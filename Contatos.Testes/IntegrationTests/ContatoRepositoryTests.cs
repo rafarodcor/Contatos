@@ -21,7 +21,7 @@ public class ContatoRepositoryTests
             .UseInMemoryDatabase(databaseName: "TestIntegrationDatabase")
             .Options;
 
-        _context = new TestDbContext(options);
+        _context = new TestDbContext(null, options);
         _repository = new ContatoRepository(_context);
     }
 

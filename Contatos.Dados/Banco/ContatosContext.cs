@@ -8,14 +8,12 @@ public class ContatosContext : DbContext
 {
     #region Constructors
 
-    private readonly IConfiguration _configuration;
+    private readonly IConfiguration? _configuration;
 
-    public ContatosContext(IConfiguration configuration)
+    public ContatosContext(IConfiguration configuration, DbContextOptions options) : base(options)
     {
         _configuration = configuration;
-    }
-
-    public ContatosContext(DbContextOptions options) : base(options) { }
+    }   
 
     #endregion
 
@@ -50,12 +48,10 @@ public class ContatosContext : DbContext
             });
         });
     }
-
-    //private string connectionString = "Server=localhost,1433;Database=ContatosDatabase;User ID=sa;Password=sqlRRC00!;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
-
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connectionString = _configuration.GetConnectionString("DefaultConnection");
+        var connectionString = _configuration?.GetConnectionString("DefaultConnection");
         optionsBuilder.UseSqlServer(connectionString);
     }
 }
