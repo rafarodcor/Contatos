@@ -1,13 +1,13 @@
 ﻿using Contatos.Modelos.Modelos;
 
-namespace Contatos.Services.Services;
+namespace Contatos.Dados.Repositories;
 
-public interface IContatoService
+public interface IContatoRepository
 {
     #region Methods
 
     Task<IEnumerable<Contato>> RecuperarContatosAsync(string? ddd, int pagina, int tamanhoPagina);
-    Task<Contato> RecuperarContatoPorIdAsync(int id);
+    Task<Contato?> RecuperarContatoPorIdAsync(int id);
     Task IncluirContatoAsync(Contato contato);
     Task AtualizarContatoAsync(Contato contato);
     Task DeletarContatoAsync(Contato contato);

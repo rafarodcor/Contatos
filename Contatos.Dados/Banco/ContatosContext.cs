@@ -15,6 +15,8 @@ public class ContatosContext : DbContext
         _configuration = configuration;
     }
 
+    public ContatosContext(DbContextOptions options) : base(options) { }
+
     #endregion
 
     public DbSet<Contato> Contatos { get; set; }

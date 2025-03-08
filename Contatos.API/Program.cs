@@ -1,4 +1,5 @@
 using Contatos.Dados.Banco;
+using Contatos.Dados.Repositories;
 using Contatos.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ builder.Services.AddDbContext<ContatosContext>();
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<ICacheService, MemCacheService>();
 builder.Services.AddTransient<IContatoService, ContatoService>();
+builder.Services.AddTransient<IContatoRepository, ContatoRepository>();
 
 builder.Services.AddControllers();
 

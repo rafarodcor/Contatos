@@ -22,10 +22,10 @@ public class Contato
 
     public int Id { get; set; }
 
-    [Required]
+    [Required(ErrorMessage="O campo nome é obrigatório")]
     public string Nome { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "O campo e-mail é obrigatório")]
     [RegularExpression(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$", ErrorMessage = "Digite um e-mail válido")]
     public string Email { get; set; }
 

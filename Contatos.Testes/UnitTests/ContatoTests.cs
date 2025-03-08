@@ -1,7 +1,7 @@
 ﻿using Contatos.Modelos.Modelos;
 using System.ComponentModel.DataAnnotations;
 
-namespace Contatos.Testes;
+namespace Contatos.Testes.UnitTests;
 
 public class ContatoTests
 {

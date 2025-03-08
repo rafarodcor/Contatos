@@ -6,9 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace Contatos.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("v1/[controller]")]
 public class ContatoController(ICacheService cacheService, IContatoService contatoService, ContatosContext context) : ControllerBase
 {
+    #region Constants
+
+    private static readonly List<string> LISTA_DDD_BRASIL =
+    [
+      "099", "098", "097", "096", "095", "094", "093", "092", "091", "089", "088", "087", "086", "085", "084", "083",
+      "082", "081", "079", "077", "075", "074", "073", "071", "069", "068", "067", "066", "065", "064", "063", "062",
+      "061", "055", "054", "053", "051", "049", "048", "047", "046", "045", "044", "043", "042", "041", "038", "037",
+      "035", "034", "033", "032", "031", "028", "027", "024", "022", "021", "019", "018", "017", "016", "015", "014",
+      "013", "012", "011"
+    ];
+
+    #endregion
+
     #region Properties
 
     private readonly ICacheService _cacheService = cacheService;
@@ -20,11 +33,13 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     #region Methods
 
     [HttpGet("/listar")]
-    public async Task<IActionResult> RecuperarContatos()
+    public async Task<IActionResult> RecuperarContatosAsync([FromQuery] string? ddd = null, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10)
+    //public async Task<IActionResult> RecuperarContatosAsync()
     {
         try
         {
-            var key = "listaContato";
+            //TO DO Testar o cache
+            var key = $"listaContato_{pagina}_{tamanhoPagina}_{ddd}";
             var cachedContatos = _cacheService.Get(key);
 
             if (cachedContatos != null)
@@ -32,7 +47,7 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
                 return Ok(cachedContatos);
             }
 
-            var listaContatos = await _contatoService.RecuperarContatos();
+            var listaContatos = await _contatoService.RecuperarContatosAsync(ddd, pagina, tamanhoPagina);
 
             _cacheService.Set(key, listaContatos);
 
@@ -40,12 +55,36 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
+    //[HttpGet("ddd/{ddd}")]
+    //public async Task<IActionResult> RecuperarContatosPorDDDAsync(string ddd)
+    //{
+    //    try
+    //    {
+    //        var cachedListaContatosPorDDD = _cacheService.Get(ddd);
+
+    //        if (cachedListaContatosPorDDD != null)
+    //        {
+    //            return Ok(cachedListaContatosPorDDD);
+    //        }
+
+    //        var listaContatosPorDDD = await _contatoService.RecuperarContatosAsync(ddd);
+
+    //        _cacheService.Set(ddd, listaContatosPorDDD);
+
+    //        return Ok(listaContatosPorDDD);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(ex.Message);
+    //    }
+    //}
+
     [HttpGet("id/{id}")]
-    public async Task<IActionResult> RecuperarContatoPorId(int id)
+    public async Task<IActionResult> RecuperarContatoPorIdAsync(int id)
     {
         try
         {
@@ -56,72 +95,55 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
                 return Ok(cachedContato);
             }
 
-            var contato = await _contatoService.RecuperarContatoPorId(id);
+            var contato = await _contatoService.RecuperarContatoPorIdAsync(id);
 
-            if(contato != null)
+            if (contato != null)
             {
                 _cacheService.Set(id.ToString(), contato);
                 return Ok(contato);
-            }         
+            }
 
             return NotFound();
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
-        }
-    }
-
-    [HttpGet("ddd/{ddd}")]
-    public async Task<IActionResult> RecuperarContatosPorDDD(string ddd)
-    {
-        try
-        {
-            var cachedListaContatosPorDDD = _cacheService.Get(ddd);
-
-            if (cachedListaContatosPorDDD != null)
-            {
-                return Ok(cachedListaContatosPorDDD);
-            }
-
-            var listaContatosPorDDD = await _contatoService.RecuperarContatos(ddd);
-
-            _cacheService.Set(ddd, listaContatosPorDDD);
-
-            return Ok(listaContatosPorDDD);
-        }
-        catch (Exception ex)
-        {
-            return Problem(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
     [HttpPost]
     [Route("/incluir")]
-    public async Task<IActionResult> IncluirContato([FromBody] Contato contato)
+    public async Task<IActionResult> IncluirContatoAsync([FromBody] Contato contato)
     {
         try
         {
-            await _contatoService.IncluirContato(contato);
+            contato.Telefone.DDD = FormatarDDD(contato.Telefone.DDD);
+
+            if (!LISTA_DDD_BRASIL.Contains(contato.Telefone.DDD))
+            {
+                return BadRequest("DDD inválido.");
+            }
+
+            await _contatoService.IncluirContatoAsync(contato);
             _cacheService.Set(contato.Id.ToString(), contato);
 
             return Ok($"Contato com chave '{contato.Id}' incluído com sucesso.");
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
-    [HttpDelete("{id}")]    
-    public async Task<IActionResult> DeletarContato(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletarContatoAsync(int id)
     {
         try
         {
             var contato = await _context.Contatos.FindAsync(id);
             if (contato != null)
             {
-                await _contatoService.DeletarContato(contato);
+                await _contatoService.DeletarContatoAsync(contato);
                 _cacheService.Remove(id.ToString());
 
                 return Ok($"Contato com chave '{id}' deletado com sucesso.");
@@ -132,26 +154,42 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
     [HttpPut]
     [Route("/atualizar")]
-    public async Task<IActionResult> AtualizarContato([FromBody] Contato contato)
+    public async Task<IActionResult> AtualizarContatoAsync([FromBody] Contato contato)
     {
         try
         {
-            await _contatoService.AtualizarContato(contato);
+            contato.Telefone.DDD = FormatarDDD(contato.Telefone.DDD);
+
+            if (!LISTA_DDD_BRASIL.Contains(contato.Telefone.DDD))
+            {
+                return BadRequest("DDD inválido.");
+            }
+
+            await _contatoService.AtualizarContatoAsync(contato);
             _cacheService.Set(contato.Id.ToString(), contato);
 
             return Ok($"Contato com chave '{contato.Id}' atualizado com sucesso.");
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
+
+    #region Private Methods
+
+    private string FormatarDDD(string ddd)
+    {
+        return ddd.Length == 2 ? $"0{ddd}" : ddd;
+    }
+
+    #endregion
 
     #endregion
 }
