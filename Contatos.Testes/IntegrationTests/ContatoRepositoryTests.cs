@@ -30,6 +30,7 @@ public class ContatoRepositoryTests
     #region Methods
 
     [Fact]
+    [Trait("Category", "Integration")]
     public async Task IncluirContatoAsync_DeveAdicionarContato()
     {
         // Arrange
@@ -51,6 +52,7 @@ public class ContatoRepositoryTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public async Task RecuperarContatosAsync_DeveRetornarContatos()
     {
         // Arrange
@@ -82,6 +84,7 @@ public class ContatoRepositoryTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public async Task DeletarContatoAsync_DeveRemoverContato()
     {
         // Arrange

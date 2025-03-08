@@ -8,6 +8,7 @@ public class ContatoTests
     #region Methods
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Contato_DeveSerValido_QuandoDadosCorretos()
     {
         // Arrange
@@ -23,6 +24,7 @@ public class ContatoTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Contato_DeveSerInvalido_QuandoEmailInvalido()
     {
         // Arrange
@@ -39,6 +41,7 @@ public class ContatoTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Contato_DeveSerInvalido_QuandoNomeVazio()
     {
         // Arrange

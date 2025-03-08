@@ -8,6 +8,7 @@ public class TelefoneTests
     #region Methods
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Telefone_DeveSerValido_QuandoDadosCorretos()
     {
         // Arrange
@@ -22,6 +23,7 @@ public class TelefoneTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Telefone_DeveSerInvalido_QuandoDDDInvalido()
     {
         // Arrange
@@ -37,6 +39,7 @@ public class TelefoneTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Telefone_DeveSerInvalido_QuandoNumeroInvalido()
     {
         // Arrange

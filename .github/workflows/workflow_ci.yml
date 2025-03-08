@@ -27,8 +27,11 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
 
-    - name: Run tests (unit and integration)
-      run: dotnet test Contatos.Testes/Contatos.Testes.csproj
+    - name: Run unit tests
+      run: dotnet test Contatos.Testes/Contatos.Testes.csproj --filter "Category=Unit"
+
+    - name: Run integration tests
+      run: dotnet test Contatos.Testes/Contatos.Testes.csproj --filter "Category=Integration"
 
     - name: Publish
       run: dotnet publish -c Release -o out    
