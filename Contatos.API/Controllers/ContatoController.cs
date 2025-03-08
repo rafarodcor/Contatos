@@ -34,11 +34,9 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
 
     [HttpGet("/listar")]
     public async Task<IActionResult> RecuperarContatosAsync([FromQuery] string? ddd = null, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 10)
-    //public async Task<IActionResult> RecuperarContatosAsync()
     {
         try
         {
-            //TO DO Testar o cache
             var key = $"listaContato_{pagina}_{tamanhoPagina}_{ddd}";
             var cachedContatos = _cacheService.Get(key);
 
@@ -58,30 +56,6 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
             return BadRequest(ex.Message);
         }
     }
-
-    //[HttpGet("ddd/{ddd}")]
-    //public async Task<IActionResult> RecuperarContatosPorDDDAsync(string ddd)
-    //{
-    //    try
-    //    {
-    //        var cachedListaContatosPorDDD = _cacheService.Get(ddd);
-
-    //        if (cachedListaContatosPorDDD != null)
-    //        {
-    //            return Ok(cachedListaContatosPorDDD);
-    //        }
-
-    //        var listaContatosPorDDD = await _contatoService.RecuperarContatosAsync(ddd);
-
-    //        _cacheService.Set(ddd, listaContatosPorDDD);
-
-    //        return Ok(listaContatosPorDDD);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return BadRequest(ex.Message);
-    //    }
-    //}
 
     [HttpGet("id/{id}")]
     public async Task<IActionResult> RecuperarContatoPorIdAsync(int id)
