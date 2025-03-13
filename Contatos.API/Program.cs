@@ -11,7 +11,7 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(opt =>
 
         opt
-            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.GatewayAPI"))
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosAPI"))
             .AddMeter(builder.Configuration.GetValue<string>("OpenRemoteManageMeterName"))
             .AddAspNetCoreInstrumentation()
             .AddRuntimeInstrumentation()
