@@ -25,7 +25,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore -nowarn:CS8618,CS8766,CS8603,CS8625
+      run: dotnet build --no-restore -nowarn:CS8618,CS8766,CS8603,CS8625,CS8604
 
     - name: Run unit tests
       run: dotnet test Contatos.Testes/Contatos.Testes.csproj --filter "Category=Unit"
@@ -34,4 +34,4 @@ jobs:
       run: dotnet test Contatos.Testes/Contatos.Testes.csproj --filter "Category=Integration"
 
     - name: Publish
-      run: dotnet publish -c Release --property:PublishDir=Publish -nowarn:CS8618,CS8766,CS8603,CS8625
+      run: dotnet publish -c Release --property:PublishDir=Publish -nowarn:CS8618,CS8766,CS8603,CS8625,CS8604
