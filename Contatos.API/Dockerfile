@@ -4,9 +4,9 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 5131
+EXPOSE 8080
 
-ENV ASPNETCORE_URLS=http://+:5131
+ENV ASPNETCORE_URLS=http://+:8080
 
 # Esta fase é usada para compilar o projeto de serviço
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

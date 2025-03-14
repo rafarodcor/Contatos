@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: ./Contatos.API/Dockerfile
     ports:
-      - 5131:5131
+      - 8080:8080
     environment:
       Otel__Endpoint: http://otel-collector:4317
     networks:
