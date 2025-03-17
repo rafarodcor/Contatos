@@ -37,6 +37,9 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     {
         try
         {
+            if (!string.IsNullOrEmpty(ddd))
+                ddd = FormatarDDD(ddd);
+
             var key = $"listaContato_{pagina}_{tamanhoPagina}_{ddd}";
             var cachedContatos = _cacheService.Get(key);
 
