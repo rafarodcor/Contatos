@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace Contatos.Services.Services;
+namespace Contatos.Services.Services.Cache;
 
 public class MemCacheService(IMemoryCache cache) : ICacheService
 {

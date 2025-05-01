@@ -1,13 +1,23 @@
 ﻿using Contatos.Dados.Banco;
 using Contatos.Modelos.Modelos;
-using Contatos.Services.Services;
+using Contatos.Services.Services.Cache;
+using Contatos.Services.Services.Persistence;
 using Microsoft.AspNetCore.Mvc;
+using Polly.Bulkhead;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 
 namespace Contatos.API.Controllers;
 
 [ApiController]
 [Route("v1/[controller]")]
-public class ContatoController(ICacheService cacheService, IContatoService contatoService, ContatosContext context) : ControllerBase
+public class ContatoController(
+    ICacheService cacheService,
+    IContatoService contatoService,
+    ContatosContext context,
+    AsyncCircuitBreakerPolicy circuitBreakerPolicy,
+    AsyncBulkheadPolicy bulkheadPolicy,
+    AsyncRetryPolicy retryPolicy) : ControllerBase
 {
     #region Constants
 
@@ -27,6 +37,9 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     private readonly ICacheService _cacheService = cacheService;
     private readonly IContatoService _contatoService = contatoService;
     private readonly ContatosContext _context = context;
+    private readonly AsyncCircuitBreakerPolicy _circuitBreakerPolicy = circuitBreakerPolicy;
+    private readonly AsyncBulkheadPolicy _bulkheadPolicy = bulkheadPolicy;
+    private readonly AsyncRetryPolicy _retryPolicy = retryPolicy;
 
     #endregion
 
@@ -37,22 +50,25 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     {
         try
         {
-            if (!string.IsNullOrEmpty(ddd))
-                ddd = FormatarDDD(ddd);
-
-            var key = $"listaContato_{pagina}_{tamanhoPagina}_{ddd}";
-            var cachedContatos = _cacheService.Get(key);
-
-            if (cachedContatos != null)
+            return await _retryPolicy.ExecuteAsync(async () =>
             {
-                return Ok(cachedContatos);
-            }
+                if (!string.IsNullOrEmpty(ddd))
+                    ddd = FormatarDDD(ddd);
 
-            var listaContatos = await _contatoService.RecuperarContatosAsync(ddd, pagina, tamanhoPagina);
+                var key = $"listaContato_{pagina}_{tamanhoPagina}_{ddd}";
+                var cachedContatos = _cacheService.Get(key);
 
-            _cacheService.Set(key, listaContatos);
+                if (cachedContatos != null)
+                {
+                    return Ok(cachedContatos);
+                }
 
-            return Ok(listaContatos);
+                var listaContatos = await _contatoService.RecuperarContatosAsync(ddd, pagina, tamanhoPagina);
+
+                _cacheService.Set(key, listaContatos);
+
+                return Ok(listaContatos);
+            });
         }
         catch (Exception ex)
         {
@@ -65,22 +81,29 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     {
         try
         {
-            var cachedContato = _cacheService.Get(id.ToString());
-
-            if (cachedContato != null)
+            return await (await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {
-                return Ok(cachedContato);
-            }
+                var cachedContato = _cacheService.Get(id.ToString());
 
-            var contato = await _contatoService.RecuperarContatoPorIdAsync(id);
+                if (cachedContato != null)
+                {
+                    return Task.FromResult<IActionResult>(Ok(cachedContato));
+                }
 
-            if (contato != null)
-            {
-                _cacheService.Set(id.ToString(), contato);
-                return Ok(contato);
-            }
+                var contato = await _contatoService.RecuperarContatoPorIdAsync(id);
 
-            return NotFound();
+                if (contato != null)
+                {
+                    _cacheService.Set(id.ToString(), contato);
+                    return Task.FromResult<IActionResult>(Ok(contato));
+                }
+
+                return Task.FromResult<IActionResult>(NotFound());
+            }));
+        }
+        catch (BulkheadRejectedException ex)
+        {
+            return Problem("Requisição rejeitada pelo Bulkhead: " + ex.Message);
         }
         catch (Exception ex)
         {
@@ -94,40 +117,27 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     {
         try
         {
-            contato.Telefone.DDD = FormatarDDD(contato.Telefone.DDD);
-
-            if (!LISTA_DDD_BRASIL.Contains(contato.Telefone.DDD))
+            return await (await _circuitBreakerPolicy.ExecuteAsync(async () =>
             {
-                return BadRequest("DDD inválido.");
-            }
+                // Para testar o circuit breaker, descomente a linha abaixo
+                //throw new Exception();
 
-            await _contatoService.IncluirContatoAsync(contato);
-            _cacheService.Set(contato.Id.ToString(), contato);
+                contato.Telefone.DDD = FormatarDDD(contato.Telefone.DDD);
 
-            return Ok($"Contato com chave '{contato.Id}' incluído com sucesso.");
+                if (!LISTA_DDD_BRASIL.Contains(contato.Telefone.DDD))
+                {
+                    return Task.FromResult<IActionResult>(BadRequest("DDD inválido."));
+                }
+
+                await _contatoService.IncluirContatoAsync(contato);
+                _cacheService.Set(contato.Id.ToString(), contato);
+
+                return Task.FromResult<IActionResult>(Ok("Contato incluído com sucesso."));
+            }));
         }
-        catch (Exception ex)
+        catch (BrokenCircuitException ex)
         {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletarContatoAsync(int id)
-    {
-        try
-        {
-            var contato = await _context.Contatos.FindAsync(id);
-            if (contato != null)
-            {
-                await _contatoService.DeletarContatoAsync(contato);
-                _cacheService.Remove(id.ToString());
-
-                return Ok($"Contato com chave '{id}' deletado com sucesso.");
-            }
-
-            return NotFound();
-
+            return Problem(ex.Message);
         }
         catch (Exception ex)
         {
@@ -141,17 +151,53 @@ public class ContatoController(ICacheService cacheService, IContatoService conta
     {
         try
         {
-            contato.Telefone.DDD = FormatarDDD(contato.Telefone.DDD);
-
-            if (!LISTA_DDD_BRASIL.Contains(contato.Telefone.DDD))
+            return await (await _bulkheadPolicy.ExecuteAsync(async () =>
             {
-                return BadRequest("DDD inválido.");
-            }
+                contato.Telefone.DDD = FormatarDDD(contato.Telefone.DDD);
 
-            await _contatoService.AtualizarContatoAsync(contato);
-            _cacheService.Set(contato.Id.ToString(), contato);
+                if (!LISTA_DDD_BRASIL.Contains(contato.Telefone.DDD))
+                {
+                    return Task.FromResult<IActionResult>(BadRequest("DDD inválido."));
+                }
 
-            return Ok($"Contato com chave '{contato.Id}' atualizado com sucesso.");
+                await _contatoService.AtualizarContatoAsync(contato);
+                _cacheService.Set(contato.Id.ToString(), contato);
+
+                return Task.FromResult<IActionResult>(Ok($"Contato com chave '{contato.Id}' atualizado com sucesso."));
+            }));
+        }
+        catch (BulkheadRejectedException ex)
+        {
+            return Problem(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletarContatoAsync(int id)
+    {
+        try
+        {
+            return await (await _bulkheadPolicy.ExecuteAsync(async () =>
+            {
+                var contato = await _context.Contatos.FindAsync(id);
+                if (contato != null)
+                {
+                    await _contatoService.DeletarContatoAsync(contato);
+                    _cacheService.Remove(id.ToString());
+
+                    return Task.FromResult<IActionResult>(Ok($"Contato com chave '{id}' deletado com sucesso."));
+                }
+
+                return Task.FromResult<IActionResult>(NotFound());
+            }));
+        }
+        catch (BulkheadRejectedException ex)
+        {
+            return Problem(ex.Message);
         }
         catch (Exception ex)
         {

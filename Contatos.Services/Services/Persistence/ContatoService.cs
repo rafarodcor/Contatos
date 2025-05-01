@@ -1,21 +1,31 @@
 ﻿using Contatos.Dados.Repositories;
 using Contatos.Modelos.Modelos;
+using Contatos.Services.Services.Producer;
 
-namespace Contatos.Services.Services;
+namespace Contatos.Services.Services.Persistence;
 
 public class ContatoService : IContatoService
 {
     #region Properties
 
     private readonly IContatoRepository _contatoRepository;
+    private readonly IIncluirContatoProducer _incluirContatoProducer;
+    private readonly IAtualizarContatoProducer _atualizarContatoProducer;
+    private readonly IDeletarContatoProducer _deletarContatoProducer;
 
     #endregion
 
     #region Constructors
 
-    public ContatoService(IContatoRepository contatoRepository)
+    public ContatoService(IContatoRepository contatoRepository,
+        IIncluirContatoProducer incluirContatoProducer,
+        IAtualizarContatoProducer atualizarContatoProducer,
+        IDeletarContatoProducer deletarContatoProducer)
     {
         _contatoRepository = contatoRepository;
+        _incluirContatoProducer = incluirContatoProducer;
+        _atualizarContatoProducer = atualizarContatoProducer;
+        _deletarContatoProducer = deletarContatoProducer;
     }
 
     #endregion
@@ -34,17 +44,17 @@ public class ContatoService : IContatoService
 
     public async Task IncluirContatoAsync(Contato contato)
     {
-        await _contatoRepository.IncluirContatoAsync(contato);
+        _incluirContatoProducer.Publish(contato);
     }
 
     public async Task AtualizarContatoAsync(Contato contato)
     {
-        await _contatoRepository.AtualizarContatoAsync(contato);
+        _atualizarContatoProducer.Publish(contato);
     }
 
     public async Task DeletarContatoAsync(Contato contato)
     {
-        await _contatoRepository.DeletarContatoAsync(contato);
+        _deletarContatoProducer.Publish(contato);
     }
 
     #endregion

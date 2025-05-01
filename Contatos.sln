@@ -11,7 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contatos.Dados", "Contatos.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contatos.Testes", "Contatos.Testes\Contatos.Testes.csproj", "{57753B29-7DDC-4753-89AC-6E5776DE21AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contatos.Services", "Contatos.Services\Contatos.Services.csproj", "{20349FF5-A741-44D8-BF0B-37F7FBEFBE9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contatos.Services", "Contatos.Services\Contatos.Services.csproj", "{20349FF5-A741-44D8-BF0B-37F7FBEFBE9D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contatos.Consumer", "Contatos.Consumer\Contatos.Consumer.csproj", "{355A7C6A-73B8-4938-81DB-975B064AAB60}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9F09DD90-0527-4479-9796-594B4CC78447}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +46,10 @@ Global
 		{20349FF5-A741-44D8-BF0B-37F7FBEFBE9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20349FF5-A741-44D8-BF0B-37F7FBEFBE9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20349FF5-A741-44D8-BF0B-37F7FBEFBE9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{355A7C6A-73B8-4938-81DB-975B064AAB60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{355A7C6A-73B8-4938-81DB-975B064AAB60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{355A7C6A-73B8-4938-81DB-975B064AAB60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{355A7C6A-73B8-4938-81DB-975B064AAB60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

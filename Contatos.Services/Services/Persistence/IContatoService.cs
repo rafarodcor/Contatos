@@ -1,6 +1,6 @@
 ﻿using Contatos.Modelos.Modelos;
 
-namespace Contatos.Services.Services;
+namespace Contatos.Services.Services.Persistence;
 
 public interface IContatoService
 {

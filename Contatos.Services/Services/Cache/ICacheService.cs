@@ -1,4 +1,4 @@
-﻿namespace Contatos.Services.Services;
+﻿namespace Contatos.Services.Services.Cache;
 
 public interface ICacheService
 {

@@ -1,3 +1,3 @@
 # Contatos
 
-Projeto Contatos - FIAP - Módulo 2
+Projeto Contatos - FIAP - Módulo 3
