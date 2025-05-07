@@ -17,6 +17,7 @@ services:
     image: contatosapi
     depends_on:
       - otel-collector
+      - rabbitmq_
     build:
       context: .
       dockerfile: ./Contatos.API/Dockerfile
@@ -30,6 +31,7 @@ services:
     image: contatosconsumer
     depends_on:
       - otel-collector
+      - rabbitmq_
     build:
       context: .
       dockerfile: ./Contatos.Consumer/Dockerfile
@@ -84,5 +86,19 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+    networks:
+      - monitoring
+  rabbitmq_:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_
+    restart: always
+    expose:
+      - 15672
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
       - monitoring
