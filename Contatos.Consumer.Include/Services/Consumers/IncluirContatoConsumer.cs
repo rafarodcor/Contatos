@@ -34,26 +34,7 @@ public class IncluirContatoConsumer : BackgroundService
         _connectionManager = connectionManager;
         _serviceProvider = servicesProvider;
         _channel = _connectionManager.GetChannel(QUEUE_NAME);
-        _logger = logger;
-
-        /*_configuration = configuration;
-
-        var factory = new ConnectionFactory
-        {
-            HostName = _configuration["RabbitMQConnection:Host"],
-            UserName = _configuration["RabbitMQConnection:Username"],
-            Password = _configuration["RabbitMQConnection:Password"]
-        };
-
-        _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
-
-        _channel.QueueDeclare(
-            queue: QUEUE_NAME,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);*/
+        _logger = logger;        
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
