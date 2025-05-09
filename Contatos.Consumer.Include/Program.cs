@@ -1,10 +1,9 @@
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using Contatos.Consumer.API.Services.Consumers;
+using Contatos.Consumer.Include.Services.Consumers;
 using Contatos.Dados.Banco;
 using Contatos.Dados.Repositories;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Contatos.Consumer.Services.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenTelemetry()
     .WithMetrics(opt =>
         opt
-            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosConsumer"))
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosConsumerInclude"))
             .AddMeter(builder.Configuration.GetValue<string>("OpenRemoteManageMeterName"))
             .AddAspNetCoreInstrumentation()
             .AddRuntimeInstrumentation()
@@ -25,13 +24,13 @@ builder.Services.AddOpenTelemetry()
     )
     .WithTracing(opt =>
         opt
-            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosConsumer"))
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosConsumerInclude"))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddOtlpExporter(opts =>
             {
                 opts.Endpoint = new Uri(builder.Configuration["Otel:Endpoint"]);
-            }));//TESTAR
+            }));
 
 #endregion
 
@@ -47,10 +46,7 @@ builder.Services.AddScoped<IContatoRepository, ContatoRepository>();
 
 // Bus
 builder.Services.AddSingleton<RabbitMQConnectionManager>();
-
 builder.Services.AddHostedService<IncluirContatoConsumer>();
-builder.Services.AddHostedService<AtualizarContatoConsumer>();
-builder.Services.AddHostedService<DeletarContatoConsumer>();
 
 #endregion
 
@@ -62,11 +58,11 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+app.UseSwagger();
+app.UseSwaggerUI();
+//}
 
 app.UseHttpsRedirection();
 

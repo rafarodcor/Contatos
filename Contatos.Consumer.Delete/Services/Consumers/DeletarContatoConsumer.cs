@@ -1,18 +1,17 @@
-﻿using Contatos.Consumer.Services.Consumers;
-using Contatos.Dados.Repositories;
+﻿using Contatos.Dados.Repositories;
 using Contatos.Modelos.Modelos;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace Contatos.Consumer.API.Services.Consumers;
+namespace Contatos.Consumer.Delete.Services.Consumers;
 
-public class AtualizarContatoConsumer : BackgroundService
+public class DeletarContatoConsumer : BackgroundService
 {
     #region Constants
 
-    private const string QUEUE_NAME = "ATUALIZAR_CONTATO";
+    private const string QUEUE_NAME = "DELETAR_CONTATO";
 
     #endregion
 
@@ -21,40 +20,21 @@ public class AtualizarContatoConsumer : BackgroundService
     private readonly RabbitMQConnectionManager _connectionManager;
     private readonly IModel _channel;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<AtualizarContatoConsumer> _logger;
+    private readonly ILogger<DeletarContatoConsumer> _logger;
 
     #endregion
 
     #region Methods
 
-    public AtualizarContatoConsumer(
+    public DeletarContatoConsumer(
         RabbitMQConnectionManager connectionManager,
         IServiceProvider servicesProvider,
-        ILogger<AtualizarContatoConsumer> logger)
+        ILogger<DeletarContatoConsumer> logger)
     {
         _connectionManager = connectionManager;
         _serviceProvider = servicesProvider;
         _channel = _connectionManager.GetChannel(QUEUE_NAME);
         _logger = logger;
-
-        /*_configuration = configuration;
-
-        var factory = new ConnectionFactory
-        {
-            HostName = _configuration["RabbitMQConnection:Host"],
-            UserName = _configuration["RabbitMQConnection:Username"],
-            Password = _configuration["RabbitMQConnection:Password"]
-        };
-
-        _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
-
-        _channel.QueueDeclare(
-            queue: QUEUE_NAME,
-            durable: false,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);*/
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -68,7 +48,7 @@ public class AtualizarContatoConsumer : BackgroundService
             var modelJson = Encoding.UTF8.GetString(modelBytes);
             var model = JsonSerializer.Deserialize<Contato>(modelJson);
 
-            await PutAsync(model);
+            await DeleteAsync(model);
 
             _channel.BasicAck(eventArgs.DeliveryTag, false);
         };
@@ -77,16 +57,16 @@ public class AtualizarContatoConsumer : BackgroundService
         return Task.CompletedTask;
     }
 
-    public async Task PutAsync(Contato model)
+    public async Task DeleteAsync(Contato model)
     {
-        _logger.LogInformation($"Consumer > ExecuteAsync > Contato > {QUEUE_NAME} > PutAsync");
+        _logger.LogInformation($"Consumer > ExecuteAsync > Contato > {QUEUE_NAME} > DeleteAsync");
 
         using (var scope = _serviceProvider.CreateScope())
         {
             var contatoRepository = scope.ServiceProvider.GetRequiredService<IContatoRepository>();
-            await contatoRepository.AtualizarContatoAsync(model);
+            await contatoRepository.DeletarContatoAsync(model);
 
-            _logger.LogInformation($"Consumer > ExecuteAsync > Contato > {QUEUE_NAME} > AtualizarContatoAsync");
+            _logger.LogInformation($"Consumer > ExecuteAsync > Contato > {QUEUE_NAME} > DeletarContatoConsumer");
         }
     }
 

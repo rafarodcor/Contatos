@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 
-namespace Contatos.Consumer.Services.Consumers;
+namespace Contatos.Consumer.Delete.Services.Consumers;
 
 public class RabbitMQConnectionManager : IDisposable
 {

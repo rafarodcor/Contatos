@@ -1,12 +1,11 @@
-﻿using Contatos.Consumer.Services.Consumers;
-using Contatos.Dados.Repositories;
+﻿using Contatos.Dados.Repositories;
 using Contatos.Modelos.Modelos;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace Contatos.Consumer.API.Services.Consumers;
+namespace Contatos.Consumer.Include.Services.Consumers;
 
 public class IncluirContatoConsumer : BackgroundService
 {

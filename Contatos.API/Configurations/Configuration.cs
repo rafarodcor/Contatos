@@ -26,7 +26,7 @@ public static class Configuration
             )
             .WithTracing(opt =>
                 opt
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosConsumer"))
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OpenRemoteManage.ContatosAPI"))
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddOtlpExporter(opts =>

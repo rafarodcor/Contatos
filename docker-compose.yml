@@ -27,16 +27,44 @@ services:
       Otel__Endpoint: http://otel-collector:4317
     networks:
       - monitoring
-  contatosconsumer:
-    image: contatosconsumer
+  contatosconsumerinc:
+    image: contatosconsumerinc
     depends_on:
       - otel-collector
       - rabbitmq_
     build:
       context: .
-      dockerfile: ./Contatos.Consumer/Dockerfile
+      dockerfile: ./Contatos.Consumer.Include/Dockerfile
     ports:
       - 8082:8082
+    environment:
+      Otel__Endpoint: http://otel-collector:4317      
+    networks:
+      - monitoring
+  contatosconsumeralt:
+    image: contatosconsumeralt
+    depends_on:
+      - otel-collector
+      - rabbitmq_
+    build:
+      context: .
+      dockerfile: ./Contatos.Consumer.Alter/Dockerfile
+    ports:
+      - 8083:8083
+    environment:
+      Otel__Endpoint: http://otel-collector:4317      
+    networks:
+      - monitoring
+  contatosconsumerdel:
+    image: contatosconsumerdel
+    depends_on:
+      - otel-collector
+      - rabbitmq_
+    build:
+      context: .
+      dockerfile: ./Contatos.Consumer.Delete/Dockerfile
+    ports:
+      - 8084:8084
     environment:
       Otel__Endpoint: http://otel-collector:4317      
     networks:

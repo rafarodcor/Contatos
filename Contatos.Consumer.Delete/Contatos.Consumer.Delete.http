@@ -1,0 +1,6 @@
+@Contatos.Consumer.Delete_HostAddress = http://localhost:5178
+
+GET {{Contatos.Consumer.Delete_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
